@@ -1,0 +1,21 @@
+# Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+
+# Build
+build/
+android/app/build/
+ios/Pods/
+
+# Firebase 
+android/app/google-services.json
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Others
+.idea/
