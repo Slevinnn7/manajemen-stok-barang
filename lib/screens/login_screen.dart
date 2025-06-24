@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../screens/dashboard_screen.dart';
 import '../services/session_helper.dart';
 
@@ -10,28 +12,51 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   String _errorMessage = '';
 
   void _handleLogin() async {
-    String username = _usernameController.text.trim();
+    String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    // Sementara: hardcoded akun
-    if ((username == 'admin' && password == 'admin123') ||
-        (username == 'gudang' && password == 'gudang123')) {
-      String role = username == 'admin' ? 'admin' : 'nonadmin';
-      await SessionHelper.saveUser(username, role);
+    try {
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
 
+      final uid = userCredential.user?.uid ?? '';
+      final userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (!userDoc.exists) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = 'Data pengguna tidak ditemukan';
+        });
+        return;
+      }
+
+      final userData = userDoc.data()!;
+      final role = userData['role'] ?? 'nonadmin';
+      final jabatan = userData['jabatan'] ?? '';
+
+      await SessionHelper.saveUser(email, role, jabatan);
+
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
-    } else {
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Username atau password salah';
+        _errorMessage = e.message ?? 'Login gagal';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      print('Error saat login: $e');
+      setState(() {
+        _errorMessage = 'Terjadi kesalahan saat login';
       });
     }
   }
@@ -46,13 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Login',
-                    style:
-                        TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 32),
                 TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(labelText: 'Username'),
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
                 ),
                 const SizedBox(height: 16),
                 TextField(

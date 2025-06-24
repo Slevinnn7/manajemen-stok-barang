@@ -1,17 +1,19 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionHelper {
-  static const _keyUsername = 'username';
+  static const _keyUsername = 'username'; // email
   static const _keyRole = 'role';
+  static const _keyJabatan = 'jabatan';
 
   // Simpan data user ke shared preferences
-  static Future<void> saveUser(String username, String role) async {
+  static Future<void> saveUser(String username, String role, String jabatan) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUsername, username);
     await prefs.setString(_keyRole, role);
+    await prefs.setString(_keyJabatan, jabatan);
   }
 
-  // Ambil username saja
+  // Ambil username/email saja
   static Future<String?> getUsername() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyUsername);
@@ -23,14 +25,19 @@ class SessionHelper {
     return prefs.getString(_keyRole);
   }
 
-  // Ambil seluruh data user (digunakan untuk akun_screen.dart)
+  // Ambil jabatan saja
+  static Future<String?> getJabatan() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyJabatan);
+  }
+
+  // Ambil seluruh data user (misal untuk akun_screen.dart)
   static Future<Map<String, String>> getUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final username = prefs.getString(_keyUsername) ?? '';
-    final role = prefs.getString(_keyRole) ?? '';
     return {
-      'uid': username, // uid = username yang disimpan saat login
-      'role': role,
+      'uid': prefs.getString(_keyUsername) ?? '',
+      'role': prefs.getString(_keyRole) ?? '',
+      'jabatan': prefs.getString(_keyJabatan) ?? '',
     };
   }
 
@@ -39,6 +46,7 @@ class SessionHelper {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyUsername);
     await prefs.remove(_keyRole);
+    await prefs.remove(_keyJabatan);
   }
 
   // Cek apakah user sudah login

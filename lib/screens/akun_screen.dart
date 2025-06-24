@@ -12,6 +12,7 @@ class AkunScreen extends StatefulWidget {
 class _AkunScreenState extends State<AkunScreen> {
   String? userId;
   String? userRole;
+  String? userJabatan;
   final TextEditingController _passwordController = TextEditingController();
 
   @override
@@ -25,6 +26,7 @@ class _AkunScreenState extends State<AkunScreen> {
     setState(() {
       userId = session['uid'];
       userRole = session['role'];
+      userJabatan = session['jabatan'];
     });
   }
 
@@ -32,12 +34,22 @@ class _AkunScreenState extends State<AkunScreen> {
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
       'password': newPassword,
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password berhasil diubah')));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password berhasil diubah')),
+    );
   }
 
   Future<void> _hapusAkun(String uid) async {
     await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Akun berhasil dihapus')));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Akun berhasil dihapus')),
+    );
   }
 
   Widget _buildAdminView() {
@@ -58,8 +70,8 @@ class _AkunScreenState extends State<AkunScreen> {
             final isNonAdmin = data['role'] != 'admin';
 
             return ListTile(
-              title: Text(data['username'] ?? 'Tanpa Nama'),
-              subtitle: Text('Role: ${data['role']}'),
+              title: Text(data['email'] ?? 'Tanpa Email'),
+              subtitle: Text('Role: ${data['role']}\nJabatan: ${data['jabatan']}'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -117,7 +129,11 @@ class _AkunScreenState extends State<AkunScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Ubah Password Anda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Jabatan: ${userJabatan ?? '-'}',
+              style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 10),
+          const Text('Ubah Password Anda',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
           TextField(
             controller: _passwordController,

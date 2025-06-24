@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/session_helper.dart';
 
 class InputBarangScreen extends StatefulWidget {
   const InputBarangScreen({super.key});
@@ -12,7 +13,19 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
   final TextEditingController _namaBarangController = TextEditingController();
   final TextEditingController _jumlahController = TextEditingController();
   String _jenis = 'masuk';
+  String? _userJabatan;
   String _status = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserJabatan();
+  }
+
+  Future<void> _loadUserJabatan() async {
+    final session = await SessionHelper.getUser();
+    setState(() => _userJabatan = session['jabatan']);
+  }
 
   Future<void> _simpanTransaksi() async {
     final nama = _namaBarangController.text.trim();
@@ -29,6 +42,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
         'jumlah': jumlah,
         'jenis': _jenis,
         'tanggal': Timestamp.now(),
+        'dicatat_oleh': _userJabatan ?? '-',
       });
 
       setState(() => _status = 'Transaksi $_jenis berhasil disimpan');
@@ -75,9 +89,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
             Text(
               _status,
               style: TextStyle(
-                color: _status.contains('berhasil')
-                    ? Colors.green
-                    : Colors.red,
+                color: _status.contains('berhasil') ? Colors.green : Colors.red,
               ),
             )
           ],

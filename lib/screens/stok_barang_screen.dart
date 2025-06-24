@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class StokBarangScreen extends StatelessWidget {
+class StokBarangScreen extends StatefulWidget {
   const StokBarangScreen({super.key});
 
-  Future<Map<String, int>> _hitungStok() async {
-    final snapshot = await FirebaseFirestore.instance.collection('transaksi').get();
+  @override
+  State<StokBarangScreen> createState() => _StokBarangScreenState();
+}
+
+class _StokBarangScreenState extends State<StokBarangScreen> {
+  String _searchKeyword = '';
+  String _filterJenis = 'semua'; // Tambahan filter jenis
+
+  Map<String, int> _hitungStok(List<QueryDocumentSnapshot> docs) {
     final Map<String, int> stok = {};
 
-    for (var doc in snapshot.docs) {
-      final data = doc.data();
-      final nama = data['nama_barang'] as String;
-      final jumlah = data['jumlah'] as int;
-      final jenis = data['jenis'] as String;
+    for (var doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final nama = (data['nama_barang'] ?? '').toString().toLowerCase();
+      final jumlah = int.tryParse(data['jumlah'].toString()) ?? 0;
+      final jenis = (data['jenis'] ?? '').toString().toLowerCase();
 
-      stok[nama] = (stok[nama] ?? 0) + (jenis == 'masuk' ? jumlah : -jumlah);
+      if (nama.isEmpty || jumlah == 0) continue;
+
+      // Filter berdasarkan jenis (masuk/keluar/semua)
+      if (_filterJenis != 'semua' && jenis != _filterJenis) continue;
+
+      if (jenis == 'masuk') {
+        stok[nama] = (stok[nama] ?? 0) + jumlah;
+      } else if (jenis == 'keluar') {
+        stok[nama] = (stok[nama] ?? 0) - jumlah;
+      }
     }
 
     return stok;
@@ -24,28 +40,90 @@ class StokBarangScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Data Stok Barang')),
-      body: FutureBuilder<Map<String, int>>(
-        future: _hitungStok(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Belum ada data stok'));
-          }
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            // 🔍 Filter Nama & Jenis Transaksi
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _filterJenis,
+                    decoration: const InputDecoration(
+                      labelText: 'Jenis Transaksi',
+                      prefixIcon: Icon(Icons.filter_list),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'semua', child: Text('Semua')),
+                      DropdownMenuItem(value: 'masuk', child: Text('Masuk')),
+                      DropdownMenuItem(value: 'keluar', child: Text('Keluar')),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _filterJenis = value ?? 'semua');
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'Cari Nama Barang',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) =>
+                        setState(() => _searchKeyword = value.toLowerCase()),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('transaksi')
+                    .orderBy('tanggal', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('Tidak ada data transaksi'));
+                  }
 
-          final stok = snapshot.data!;
+                  final docs = snapshot.data!.docs;
+                  final stok = _hitungStok(docs);
 
-          return ListView(
-            children: stok.entries.map((entry) {
-              return ListTile(
-                title: Text(entry.key),
-                trailing: Text('Stok: ${entry.value}'),
-              );
-            }).toList(),
-          );
-        },
+                  final filteredStok = stok.entries.where((entry) {
+                    return entry.key.contains(_searchKeyword);
+                  }).toList();
+
+                  if (filteredStok.isEmpty) {
+                    return const Center(child: Text('Barang tidak ditemukan'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: filteredStok.length,
+                    itemBuilder: (context, index) {
+                      final entry = filteredStok[index];
+                      return ListTile(
+                        leading: const Icon(Icons.inventory),
+                        title: Text(entry.key.toUpperCase()),
+                        trailing: Text(
+                          '${entry.value}',
+                          style: TextStyle(
+                            color: entry.value >= 0 ? Colors.teal : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

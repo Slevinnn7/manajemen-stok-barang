@@ -6,16 +6,45 @@ import 'akun_screen.dart';
 import '../services/session_helper.dart';
 import 'login_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
-  void _logout(BuildContext context) async {
-    await SessionHelper.clearUser();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  String _role = '';
+  String _jabatan = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSession();
   }
+
+  Future<void> _loadSession() async {
+    final role = await SessionHelper.getRole() ?? '';
+    final jabatan = await SessionHelper.getJabatan() ?? '';
+    setState(() {
+      _role = role;
+      _jabatan = jabatan;
+    });
+  }
+
+  void _logout() async {
+  await SessionHelper.clearUser();
+  if (!mounted) return;
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const LoginScreen()),
+  );
+}
+
+
+  bool get isAdmin => _role == 'admin';
+  bool get isKepalaGudang => _jabatan == 'Kepala Gudang';
+  bool get isStaffGudang => _jabatan == 'Staff Gudang';
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +54,7 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
+            onPressed: _logout,
           )
         ],
       ),
@@ -36,12 +65,18 @@ class DashboardScreen extends StatelessWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: [
-            _buildMenuCard(context, 'Input Barang', Icons.add_box,
-                const InputBarangScreen()),
+            if (isAdmin || isKepalaGudang)
+              _buildMenuCard(context, 'Input Barang', Icons.add_box,
+                  const InputBarangScreen()),
+
+            // ✅ Tambahan menu untuk melihat stok
             _buildMenuCard(context, 'Lihat Stok', Icons.inventory,
                 const StokBarangScreen()),
-            _buildMenuCard(context, 'Riwayat', Icons.history,
-                const RiwayatScreen()),
+
+            if (isAdmin || isKepalaGudang)
+              _buildMenuCard(context, 'Riwayat', Icons.history,
+                  const RiwayatScreen()),
+
             _buildMenuCard(context, 'Akun', Icons.person,
                 const AkunScreen()),
           ],

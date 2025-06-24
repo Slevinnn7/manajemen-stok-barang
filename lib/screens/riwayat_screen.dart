@@ -128,7 +128,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                         color: data['jenis'] == 'masuk' ? Colors.green : Colors.red,
                       ),
                       title: Text(data['nama_barang'] ?? '-'),
-                      subtitle: Text('Jumlah: ${data['jumlah']}  •  Tanggal: $formattedDate'),
+                      subtitle: Text('Jumlah: ${data['jumlah']}\nDicatat oleh: ${data['dicatat_oleh'] ?? '-'}\nTanggal: $formattedDate'),
                       trailing: Text(
                         data['jenis'] == 'masuk' ? 'Masuk' : 'Keluar',
                         style: TextStyle(
