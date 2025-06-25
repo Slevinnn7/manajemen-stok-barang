@@ -10,7 +10,8 @@ class StokBarangScreen extends StatefulWidget {
 
 class _StokBarangScreenState extends State<StokBarangScreen> {
   String _searchKeyword = '';
-  String _filterJenis = 'semua'; // Tambahan filter jenis
+  String _filterJenis = 'semua';
+  String _stokFilter = 'semua'; // Tambahan filter stok
 
   Map<String, int> _hitungStok(List<QueryDocumentSnapshot> docs) {
     final Map<String, int> stok = {};
@@ -22,8 +23,6 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
       final jenis = (data['jenis'] ?? '').toString().toLowerCase();
 
       if (nama.isEmpty || jumlah == 0) continue;
-
-      // Filter berdasarkan jenis (masuk/keluar/semua)
       if (_filterJenis != 'semua' && jenis != _filterJenis) continue;
 
       if (jenis == 'masuk') {
@@ -44,7 +43,6 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // 🔍 Filter Nama & Jenis Transaksi
             Row(
               children: [
                 Expanded(
@@ -66,16 +64,32 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextField(
+                  child: DropdownButtonFormField<String>(
+                    value: _stokFilter,
                     decoration: const InputDecoration(
-                      labelText: 'Cari Nama Barang',
-                      prefixIcon: Icon(Icons.search),
+                      labelText: 'Filter Stok',
+                      prefixIcon: Icon(Icons.warning),
                     ),
-                    onChanged: (value) =>
-                        setState(() => _searchKeyword = value.toLowerCase()),
+                    items: const [
+                      DropdownMenuItem(value: 'semua', child: Text('Semua')),
+                      DropdownMenuItem(value: 'habis', child: Text('Stok Habis')),
+                      DropdownMenuItem(value: 'rendah', child: Text('Stok < 3')),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _stokFilter = value ?? 'semua');
+                    },
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Cari Nama Barang',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) =>
+                  setState(() => _searchKeyword = value.toLowerCase()),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -95,7 +109,14 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                   final stok = _hitungStok(docs);
 
                   final filteredStok = stok.entries.where((entry) {
-                    return entry.key.contains(_searchKeyword);
+                    final nameMatch = entry.key.contains(_searchKeyword);
+                    final stokValue = entry.value;
+
+                    final stokMatch = _stokFilter == 'semua'
+                        || (_stokFilter == 'habis' && stokValue <= 0)
+                        || (_stokFilter == 'rendah' && stokValue > 0 && stokValue < 3);
+
+                    return nameMatch && stokMatch;
                   }).toList();
 
                   if (filteredStok.isEmpty) {
@@ -106,16 +127,27 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                     itemCount: filteredStok.length,
                     itemBuilder: (context, index) {
                       final entry = filteredStok[index];
+                      final jumlah = entry.value;
                       return ListTile(
                         leading: const Icon(Icons.inventory),
                         title: Text(entry.key.toUpperCase()),
-                        trailing: Text(
-                          '${entry.value}',
-                          style: TextStyle(
-                            color: entry.value >= 0 ? Colors.teal : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        trailing: jumlah <= 0
+                            ? const Text(
+                                'Habis',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              )
+                            : Text(
+                                '$jumlah',
+                                style: TextStyle(
+                                  color: jumlah < 3 ? Colors.orange : Colors.teal,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
                       );
                     },
                   );

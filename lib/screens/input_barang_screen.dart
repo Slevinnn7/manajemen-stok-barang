@@ -15,16 +15,48 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
   String _jenis = 'masuk';
   String? _userJabatan;
   String _status = '';
+  List<String> _daftarNamaBarang = [];
 
   @override
   void initState() {
     super.initState();
     _loadUserJabatan();
+    _loadNamaBarang();
   }
 
   Future<void> _loadUserJabatan() async {
     final session = await SessionHelper.getUser();
     setState(() => _userJabatan = session['jabatan']);
+  }
+
+  Future<void> _loadNamaBarang() async {
+    final snapshot = await FirebaseFirestore.instance.collection('transaksi').get();
+    final namaSet = <String>{};
+    for (var doc in snapshot.docs) {
+      final nama = doc['nama_barang']?.toString().trim();
+      if (nama != null && nama.isNotEmpty) {
+        namaSet.add(nama);
+      }
+    }
+    setState(() => _daftarNamaBarang = namaSet.toList());
+  }
+
+  Future<int> _getStokSaatIni(String namaBarang) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('transaksi')
+        .where('nama_barang', isEqualTo: namaBarang)
+        .get();
+
+    int totalStok = 0;
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      if (data['jenis'] == 'masuk') {
+        totalStok += (data['jumlah'] ?? 0) as int;
+      } else if (data['jenis'] == 'keluar') {
+        totalStok -= (data['jumlah'] ?? 0) as int;
+      }
+    }
+    return totalStok;
   }
 
   Future<void> _simpanTransaksi() async {
@@ -36,6 +68,37 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
       return;
     }
 
+    if (_jenis == 'keluar') {
+      final stokSaatIni = await _getStokSaatIni(nama);
+      if (jumlah > stokSaatIni) {
+        setState(() => _status = 'Persediaan barang tidak cukup');
+        return;
+      }
+    }
+
+    final jenisLabel = _jenis == 'masuk' ? 'Barang Masuk' : 'Barang Keluar';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: Text(
+          'Apakah Anda yakin ingin menyimpan $jenisLabel "$nama" sejumlah $jumlah?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Ya, Simpan'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     try {
       await FirebaseFirestore.instance.collection('transaksi').add({
         'nama_barang': nama,
@@ -45,10 +108,16 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
         'dicatat_oleh': _userJabatan ?? '-',
       });
 
-      setState(() => _status = 'Transaksi $_jenis berhasil disimpan');
-      _namaBarangController.clear();
-      _jumlahController.clear();
+      if (!mounted) return;
+
+      setState(() {
+        _status = 'Transaksi $_jenis berhasil disimpan';
+        _namaBarangController.clear();
+        _jumlahController.clear();
+        _jenis = 'masuk';
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _status = 'Gagal menyimpan data');
     }
   }
@@ -71,9 +140,26 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
               ],
               onChanged: (value) => setState(() => _jenis = value!),
             ),
-            TextField(
-              controller: _namaBarangController,
-              decoration: const InputDecoration(labelText: 'Nama Barang'),
+            const SizedBox(height: 10),
+            Autocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) {
+                  return const Iterable<String>.empty();
+                }
+                return _daftarNamaBarang.where((nama) =>
+                    nama.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+              },
+              onSelected: (String selection) {
+                _namaBarangController.text = selection;
+              },
+              fieldViewBuilder: (context, _, focusNode, onEditingComplete) {
+                return TextField(
+                  controller: _namaBarangController,
+                  focusNode: focusNode,
+                  onEditingComplete: onEditingComplete,
+                  decoration: const InputDecoration(labelText: 'Nama Barang'),
+                );
+              },
             ),
             TextField(
               controller: _jumlahController,

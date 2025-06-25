@@ -14,6 +14,7 @@ class _AkunScreenState extends State<AkunScreen> {
   String? userRole;
   String? userJabatan;
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -40,6 +41,8 @@ class _AkunScreenState extends State<AkunScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Password berhasil diubah')),
     );
+
+    _passwordController.clear(); // Reset password setelah berhasil
   }
 
   Future<void> _hapusAkun(String uid) async {
@@ -71,7 +74,7 @@ class _AkunScreenState extends State<AkunScreen> {
 
             return ListTile(
               title: Text(data['email'] ?? 'Tanpa Email'),
-              subtitle: Text('Role: ${data['role']}\nJabatan: ${data['jabatan']}'),
+              subtitle: Text('Role: ${data['role']}Jabatan: ${data['jabatan']}'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -94,31 +97,44 @@ class _AkunScreenState extends State<AkunScreen> {
   }
 
   void _showUbahPasswordDialog(String uid) {
+    final tempController = TextEditingController();
+    bool obscureLocal = true;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ubah Password'),
-        content: TextField(
-          controller: _passwordController,
-          obscureText: true,
-          decoration: const InputDecoration(labelText: 'Password Baru'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text('Ubah Password'),
+          content: TextField(
+            controller: tempController,
+            obscureText: obscureLocal,
+            decoration: InputDecoration(
+              labelText: 'Password Baru',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscureLocal ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () => setStateDialog(() => obscureLocal = !obscureLocal),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final pass = tempController.text.trim();
+                if (pass.isNotEmpty) {
+                  _ubahPassword(uid, pass);
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final pass = _passwordController.text.trim();
-              if (pass.isNotEmpty) {
-                _ubahPassword(uid, pass);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
       ),
     );
   }
@@ -137,8 +153,20 @@ class _AkunScreenState extends State<AkunScreen> {
           const SizedBox(height: 10),
           TextField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password Baru'),
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              labelText: 'Password Baru',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
