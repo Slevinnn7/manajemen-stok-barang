@@ -122,18 +122,33 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                     final tanggal = (data['tanggal'] as Timestamp).toDate();
                     final formattedDate = DateFormat('dd MMM yyyy HH:mm').format(tanggal);
 
+                    final isKeluar = data['jenis'] == 'keluar';
+
                     return ListTile(
                       leading: Icon(
-                        data['jenis'] == 'masuk' ? Icons.add : Icons.remove,
-                        color: data['jenis'] == 'masuk' ? Colors.green : Colors.red,
+                        isKeluar ? Icons.remove : Icons.add,
+                        color: isKeluar ? Colors.red : Colors.green,
                       ),
                       title: Text(data['nama_barang'] ?? '-'),
-                      subtitle: Text('Jumlah: ${data['jumlah']}\nDicatat oleh: ${data['dicatat_oleh'] ?? '-'}\nTanggal: $formattedDate'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Jumlah: ${data['jumlah']}'),
+                          if (isKeluar) ...[
+                            Text('Nama Pengambil: ${data['nama_pengambil'] ?? '-'}'),
+                            Text('Mobil: ${data['mobil'] ?? '-'}'),
+                          ] else ...[
+                            Text('Dicatat oleh: ${data['dicatat_oleh'] ?? '-'}'),
+                          ],
+                          Text('Tanggal: $formattedDate'),
+                        ],
+                      ),
                       trailing: Text(
-                        data['jenis'] == 'masuk' ? 'Masuk' : 'Keluar',
+                        isKeluar ? 'Keluar' : 'Masuk',
                         style: TextStyle(
-                          color: data['jenis'] == 'masuk' ? Colors.green : Colors.red,
+                          color: isKeluar ? Colors.red : Colors.green,
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
                     );

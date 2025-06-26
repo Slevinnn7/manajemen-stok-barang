@@ -11,7 +11,7 @@ class StokBarangScreen extends StatefulWidget {
 class _StokBarangScreenState extends State<StokBarangScreen> {
   String _searchKeyword = '';
   String _filterJenis = 'semua';
-  String _stokFilter = 'semua'; // Tambahan filter stok
+  String _stokFilter = 'semua';
 
   Map<String, int> _hitungStok(List<QueryDocumentSnapshot> docs) {
     final Map<String, int> stok = {};
@@ -33,6 +33,38 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
     }
 
     return stok;
+  }
+
+  void _showKeteranganWarna() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Keterangan Warna Stok'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            ListTile(
+              leading: CircleAvatar(backgroundColor: Colors.green),
+              title: Text('Stok Cukup'),
+            ),
+            ListTile(
+              leading: CircleAvatar(backgroundColor: Colors.orange),
+              title: Text('Stok Menipis (< 3)'),
+            ),
+            ListTile(
+              leading: CircleAvatar(backgroundColor: Colors.red),
+              title: Text('Stok Habis'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -156,6 +188,11 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showKeteranganWarna,
+        tooltip: 'Keterangan Warna Stok',
+        child: const Icon(Icons.info_outline),
       ),
     );
   }
