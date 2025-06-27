@@ -11,12 +11,11 @@ class InputBarangScreen extends StatefulWidget {
 
 class _InputBarangScreenState extends State<InputBarangScreen> {
   final TextEditingController _jumlahController = TextEditingController();
-  final TextEditingController _namaPengambilController = TextEditingController();
-  final TextEditingController _namaMobilController = TextEditingController();
 
   String _jenis = 'masuk';
   String? _userJabatan;
   String? _selectedBarang;
+  String? _selectedPlatMobil;
   String _status = '';
 
   @override
@@ -58,8 +57,8 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     }
 
     if (_jenis == 'keluar') {
-      if (_namaPengambilController.text.trim().isEmpty || _namaMobilController.text.trim().isEmpty) {
-        setState(() => _status = 'Nama pengambil dan mobil harus diisi');
+      if (_selectedPlatMobil == null) {
+        setState(() => _status = 'Plat mobil harus dipilih');
         return;
       }
       final stokSaatIni = await _getStokSaatIni(nama);
@@ -92,7 +91,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     if (confirmed != true) return;
 
     try {
-      final data = {
+      final Map<String, dynamic> data = {
         'nama_barang': nama,
         'jumlah': jumlah,
         'jenis': _jenis,
@@ -101,8 +100,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
       };
 
       if (_jenis == 'keluar') {
-        data['nama_pengambil'] = _namaPengambilController.text.trim();
-        data['mobil'] = _namaMobilController.text.trim();
+        data['mobil'] = _selectedPlatMobil ?? '';
       }
 
       await FirebaseFirestore.instance.collection('transaksi').add(data);
@@ -113,8 +111,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
         _status = 'Transaksi $_jenis berhasil disimpan';
         _selectedBarang = null;
         _jumlahController.clear();
-        _namaPengambilController.clear();
-        _namaMobilController.clear();
+        _selectedPlatMobil = null;
         _jenis = 'masuk';
       });
     } catch (e) {
@@ -129,71 +126,121 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
       appBar: AppBar(title: const Text('Input Barang')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Jenis Transaksi:', style: TextStyle(fontSize: 16)),
-            DropdownButton<String>(
-              value: _jenis,
-              items: const [
-                DropdownMenuItem(value: 'masuk', child: Text('Barang Masuk')),
-                DropdownMenuItem(value: 'keluar', child: Text('Barang Keluar')),
-              ],
-              onChanged: (value) => setState(() => _jenis = value!),
-            ),
-            const SizedBox(height: 10),
-
-            if (_jenis == 'keluar') ...[
-              TextField(
-                controller: _namaPengambilController,
-                decoration: const InputDecoration(labelText: 'Nama Pengambil'),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Jenis Transaksi:', style: TextStyle(fontSize: 16)),
+              DropdownButton<String>(
+                value: _jenis,
+                items: const [
+                  DropdownMenuItem(value: 'masuk', child: Text('Barang Masuk')),
+                  DropdownMenuItem(value: 'keluar', child: Text('Barang Keluar')),
+                ],
+                onChanged: (value) => setState(() => _jenis = value!),
               ),
-              TextField(
-                controller: _namaMobilController,
-                decoration: const InputDecoration(labelText: 'Mobil'),
-              ),
-            ],
+              const SizedBox(height: 10),
 
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('barang').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const CircularProgressIndicator();
+              if (_jenis == 'keluar')
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('mobil').snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (snapshot.hasError) {
+                      return const Text('Gagal memuat data mobil');
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Text('Tidak ada data mobil');
+                    }
 
-                final barangList = snapshot.data!.docs.map((doc) => doc['nama'] as String).toList();
+                    final platList = snapshot.data!.docs
+                        .map((doc) => doc['plat']?.toString() ?? '')
+                        .where((plat) => plat.isNotEmpty)
+                        .toList();
 
-                return DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Nama Barang'),
-                  value: _selectedBarang,
-                  items: barangList.map((nama) {
-                    return DropdownMenuItem<String>(
-                      value: nama,
-                      child: Text(nama),
+                    return DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(labelText: 'Plat Mobil'),
+                      value: _selectedPlatMobil,
+                      items: [
+                        for (int i = 0; i < platList.length; i++)
+                          DropdownMenuItem<String>(
+                            value: platList[i],
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(platList[i]),
+                                if (i < platList.length - 1)
+                                  const Divider(height: 10, thickness: 1),
+                              ],
+                            ),
+                          )
+                      ],
+                      onChanged: (value) => setState(() => _selectedPlatMobil = value),
                     );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _selectedBarang = value),
-                );
-              },
-            ),
+                  },
+                ),
 
-            TextField(
-              controller: _jumlahController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Jumlah'),
-            ),
+              const SizedBox(height: 10),
 
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _simpanTransaksi,
-              child: const Text('Simpan'),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              _status,
-              style: TextStyle(
-                color: _status.contains('berhasil') ? Colors.green : Colors.red,
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('barang').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return const Text('Gagal memuat data barang');
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Text('Tidak ada data barang');
+                  }
+
+                  final barangList = snapshot.data!.docs.map((doc) => doc['nama'] as String).toList();
+
+                  return DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'Nama Barang'),
+                    value: _selectedBarang,
+                    items: [
+                      for (int i = 0; i < barangList.length; i++)
+                        DropdownMenuItem<String>(
+                          value: barangList[i],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(barangList[i]),
+                              if (i < barangList.length - 1)
+                                const Divider(height: 10, thickness: 1),
+                            ],
+                          ),
+                        )
+                    ],
+                    onChanged: (value) => setState(() => _selectedBarang = value),
+                  );
+                },
               ),
-            )
-          ],
+
+              TextField(
+                controller: _jumlahController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Jumlah'),
+              ),
+
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _simpanTransaksi,
+                child: const Text('Simpan'),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _status,
+                style: TextStyle(
+                  color: _status.contains('berhasil') ? Colors.green : Colors.red,
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

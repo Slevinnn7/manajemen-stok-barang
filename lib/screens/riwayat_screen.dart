@@ -134,12 +134,10 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Jumlah: ${data['jumlah']}'),
-                          if (isKeluar) ...[
-                            Text('Nama Pengambil: ${data['nama_pengambil'] ?? '-'}'),
-                            Text('Mobil: ${data['mobil'] ?? '-'}'),
-                          ] else ...[
+                          if (isKeluar)
+                            Text('Plat Mobil: ${data['mobil'] ?? '-'}')
+                          else
                             Text('Dicatat oleh: ${data['dicatat_oleh'] ?? '-'}'),
-                          ],
                           Text('Tanggal: $formattedDate'),
                         ],
                       ),
