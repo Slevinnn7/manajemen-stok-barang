@@ -69,6 +69,8 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     }
 
     final jenisLabel = _jenis == 'masuk' ? 'Barang Masuk' : 'Barang Keluar';
+
+    if (!mounted) return; 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

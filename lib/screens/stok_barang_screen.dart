@@ -40,9 +40,9 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Keterangan Warna Stok'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             ListTile(
               leading: CircleAvatar(backgroundColor: Colors.green),
               title: Text('Stok Cukup'),
@@ -104,8 +104,10 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                     ),
                     items: const [
                       DropdownMenuItem(value: 'semua', child: Text('Semua')),
-                      DropdownMenuItem(value: 'habis', child: Text('Stok Habis')),
-                      DropdownMenuItem(value: 'rendah', child: Text('Stok < 3')),
+                      DropdownMenuItem(
+                          value: 'habis', child: Text('Stok Habis')),
+                      DropdownMenuItem(
+                          value: 'rendah', child: Text('Stok < 3')),
                     ],
                     onChanged: (value) {
                       setState(() => _stokFilter = value ?? 'semua');
@@ -134,7 +136,8 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('Tidak ada data transaksi'));
+                    return const Center(
+                        child: Text('Tidak ada data transaksi'));
                   }
 
                   final docs = snapshot.data!.docs;
@@ -144,9 +147,11 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                     final nameMatch = entry.key.contains(_searchKeyword);
                     final stokValue = entry.value;
 
-                    final stokMatch = _stokFilter == 'semua'
-                        || (_stokFilter == 'habis' && stokValue <= 0)
-                        || (_stokFilter == 'rendah' && stokValue > 0 && stokValue < 3);
+                    final stokMatch = _stokFilter == 'semua' ||
+                        (_stokFilter == 'habis' && stokValue <= 0) ||
+                        (_stokFilter == 'rendah' &&
+                            stokValue > 0 &&
+                            stokValue < 3);
 
                     return nameMatch && stokMatch;
                   }).toList();
@@ -175,7 +180,8 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
                             : Text(
                                 '$jumlah',
                                 style: TextStyle(
-                                  color: jumlah < 3 ? Colors.orange : Colors.teal,
+                                  color:
+                                      jumlah < 3 ? Colors.orange : Colors.teal,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
                                 ),

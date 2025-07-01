@@ -1,3 +1,4 @@
+import 'dart:developer'; // Tambahkan ini untuk log
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,11 +26,14 @@ class _LoginScreenState extends State<LoginScreen> {
           .signInWithEmailAndPassword(email: email, password: password);
 
       final uid = userCredential.user?.uid ?? '';
-      final userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      if (!mounted) return; // ✅ Tambahkan ini sebelum penggunaan context
 
       if (!userDoc.exists) {
-        if (!mounted) return;
         setState(() {
           _errorMessage = 'Data pengguna tidak ditemukan';
         });
@@ -42,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await SessionHelper.saveUser(email, role, jabatan);
 
-      if (!mounted) return;
+      if (!mounted) return; // ✅ Tambahkan ini lagi sebelum context digunakan
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -54,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      print('Error saat login: $e');
+      log('Error saat login: $e'); // ✅ Ganti print dengan log()
       setState(() {
         _errorMessage = 'Terjadi kesalahan saat login';
       });
