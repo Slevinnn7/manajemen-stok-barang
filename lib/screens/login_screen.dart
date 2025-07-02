@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .doc(uid)
           .get();
 
-      if (!mounted) return; // ✅ Tambahkan ini sebelum penggunaan context
+      if (!mounted) return; 
 
       if (!userDoc.exists) {
         setState(() {
@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await SessionHelper.saveUser(email, role, jabatan);
 
-      if (!mounted) return; // ✅ Tambahkan ini lagi sebelum context digunakan
+      if (!mounted) return; 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      log('Error saat login: $e'); // ✅ Ganti print dengan log()
+      log('Error saat login: $e'); 
       setState(() {
         _errorMessage = 'Terjadi kesalahan saat login';
       });

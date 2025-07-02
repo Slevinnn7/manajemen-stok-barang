@@ -69,7 +69,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildMenuCard(context, 'Input Barang', Icons.add_box,
                   const InputBarangScreen()),
 
-            // ✅ Tambahan menu untuk melihat stok
             _buildMenuCard(context, 'Lihat Stok', Icons.inventory,
                 const StokBarangScreen()),
 
