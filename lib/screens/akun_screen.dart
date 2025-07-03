@@ -72,22 +72,26 @@ class _AkunScreenState extends State<AkunScreen> {
             final uid = users[index].id;
             final isNonAdmin = data['role'] != 'admin';
 
-            return ListTile(
-              title: Text(data['email'] ?? 'Tanpa Email'),
-              subtitle: Text('Role: ${data['role']}Jabatan: ${data['jabatan']}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.lock_open),
-                    onPressed: () => _showUbahPasswordDialog(uid),
-                  ),
-                  if (isNonAdmin)
+            return Card(
+              color: Colors.white.withOpacity(0.9),
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ListTile(
+                title: Text(data['email'] ?? 'Tanpa Email'),
+                subtitle: Text('Role: ${data['role']} | Jabatan: ${data['jabatan']}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _hapusAkun(uid),
+                      icon: const Icon(Icons.lock_open),
+                      onPressed: () => _showUbahPasswordDialog(uid),
                     ),
-                ],
+                    if (isNonAdmin)
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _hapusAkun(uid),
+                      ),
+                  ],
+                ),
               ),
             );
           },
@@ -140,45 +144,53 @@ class _AkunScreenState extends State<AkunScreen> {
   }
 
   Widget _buildUserView() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Jabatan: ${userJabatan ?? '-'}',
-              style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 10),
-          const Text('Ubah Password Anda',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Password Baru',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+    return Center(
+      child: Card(
+        color: Colors.white.withOpacity(0.95),
+        margin: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Jabatan: ${userJabatan ?? '-'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 10),
+              const Text('Ubah Password Anda',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password Baru',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
               ),
-            ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  final pass = _passwordController.text.trim();
+                  if (pass.isNotEmpty && userId != null) {
+                    _ubahPassword(userId!, pass);
+                  }
+                },
+                child: const Text('Simpan'),
+              )
+            ],
           ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              final pass = _passwordController.text.trim();
-              if (pass.isNotEmpty && userId != null) {
-                _ubahPassword(userId!, pass);
-              }
-            },
-            child: const Text('Simpan'),
-          )
-        ],
+        ),
       ),
     );
   }
@@ -186,12 +198,28 @@ class _AkunScreenState extends State<AkunScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Akun Saya')),
-      body: userRole == null
-          ? const Center(child: CircularProgressIndicator())
-          : userRole == 'admin'
-              ? _buildAdminView()
-              : _buildUserView(),
+      appBar: AppBar(
+        title: const Text('Akun Saya'),
+        backgroundColor: const Color(0xFF03A9F4), // Biru muda
+      ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // Putih ke biru muda
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          userRole == null
+              ? const Center(child: CircularProgressIndicator())
+              : userRole == 'admin'
+                  ? _buildAdminView()
+                  : _buildUserView(),
+        ],
+      ),
     );
   }
 }

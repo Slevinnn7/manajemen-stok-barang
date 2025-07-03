@@ -33,14 +33,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _logout() async {
-  await SessionHelper.clearUser();
-  if (!mounted) return;
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const LoginScreen()),
-  );
-}
-
+    await SessionHelper.clearUser();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
 
   bool get isAdmin => _role == 'admin';
   bool get isKepalaGudang => _jabatan == 'Kepala Gudang';
@@ -51,6 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
+        backgroundColor: const Color(0xFF03A9F4), // Biru muda untuk konsistensi
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -58,27 +58,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          children: [
-            if (isAdmin || isKepalaGudang)
-              _buildMenuCard(context, 'Input Barang', Icons.add_box,
-                  const InputBarangScreen()),
-
-            _buildMenuCard(context, 'Lihat Stok', Icons.inventory,
-                const StokBarangScreen()),
-
-            if (isAdmin || isKepalaGudang)
-              _buildMenuCard(context, 'Riwayat', Icons.history,
-                  const RiwayatScreen()),
-
-            _buildMenuCard(context, 'Akun', Icons.person,
-                const AkunScreen()),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // Putih ke biru muda
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: [
+              if (isAdmin || isKepalaGudang)
+                _buildMenuCard(context, 'Input Barang', Icons.add_box, const InputBarangScreen()),
+              _buildMenuCard(context, 'Lihat Stok', Icons.inventory, const StokBarangScreen()),
+              if (isAdmin || isKepalaGudang)
+                _buildMenuCard(context, 'Riwayat', Icons.history, const RiwayatScreen()),
+              _buildMenuCard(context, 'Akun', Icons.person, const AkunScreen()),
+            ],
+          ),
         ),
       ),
     );
@@ -87,8 +89,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildMenuCard(
       BuildContext context, String title, IconData icon, Widget screen) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 6,
+      color: Colors.white.withOpacity(0.9),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -96,14 +99,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (context) => screen),
           );
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 48, color: Colors.teal),
               const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontSize: 16))
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
             ],
           ),
         ),

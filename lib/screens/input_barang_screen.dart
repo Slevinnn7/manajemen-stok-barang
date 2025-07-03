@@ -70,7 +70,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
 
     final jenisLabel = _jenis == 'masuk' ? 'Barang Masuk' : 'Barang Keluar';
 
-    if (!mounted) return; 
+    if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -125,125 +125,154 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Input Barang')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Jenis Transaksi:', style: TextStyle(fontSize: 16)),
-              DropdownButton<String>(
-                value: _jenis,
-                items: const [
-                  DropdownMenuItem(value: 'masuk', child: Text('Barang Masuk')),
-                  DropdownMenuItem(value: 'keluar', child: Text('Barang Keluar')),
-                ],
-                onChanged: (value) => setState(() => _jenis = value!),
+      appBar: AppBar(
+        title: const Text('Input Barang'),
+        backgroundColor: const Color(0xFF03A9F4), // biru muda
+      ),
+      body: Stack(
+        children: [
+          // 🔷 Background gradasi dari putih ke biru muda
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 10),
-
-              if (_jenis == 'keluar')
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('mobil').snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    if (snapshot.hasError) {
-                      return const Text('Gagal memuat data mobil');
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Text('Tidak ada data mobil');
-                    }
-
-                    final platList = snapshot.data!.docs
-                        .map((doc) => doc['plat']?.toString() ?? '')
-                        .where((plat) => plat.isNotEmpty)
-                        .toList();
-
-                    return DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(labelText: 'Plat Mobil'),
-                      value: _selectedPlatMobil,
-                      items: [
-                        for (int i = 0; i < platList.length; i++)
-                          DropdownMenuItem<String>(
-                            value: platList[i],
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(platList[i]),
-                                if (i < platList.length - 1)
-                                  const Divider(height: 10, thickness: 1),
-                              ],
-                            ),
-                          )
-                      ],
-                      onChanged: (value) => setState(() => _selectedPlatMobil = value),
-                    );
-                  },
-                ),
-
-              const SizedBox(height: 10),
-
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('barang').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-                  if (snapshot.hasError) {
-                    return const Text('Gagal memuat data barang');
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Text('Tidak ada data barang');
-                  }
-
-                  final barangList = snapshot.data!.docs.map((doc) => doc['nama'] as String).toList();
-
-                  return DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'Nama Barang'),
-                    value: _selectedBarang,
-                    items: [
-                      for (int i = 0; i < barangList.length; i++)
-                        DropdownMenuItem<String>(
-                          value: barangList[i],
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(barangList[i]),
-                              if (i < barangList.length - 1)
-                                const Divider(height: 10, thickness: 1),
-                            ],
-                          ),
-                        )
-                    ],
-                    onChanged: (value) => setState(() => _selectedBarang = value),
-                  );
-                },
-              ),
-
-              TextField(
-                controller: _jumlahController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Jumlah'),
-              ),
-
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _simpanTransaksi,
-                child: const Text('Simpan'),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _status,
-                style: TextStyle(
-                  color: _status.contains('berhasil') ? Colors.green : Colors.red,
-                ),
-              )
-            ],
+            ),
           ),
-        ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Jenis Transaksi:', style: TextStyle(fontSize: 16)),
+                      DropdownButton<String>(
+                        value: _jenis,
+                        items: const [
+                          DropdownMenuItem(value: 'masuk', child: Text('Barang Masuk')),
+                          DropdownMenuItem(value: 'keluar', child: Text('Barang Keluar')),
+                        ],
+                        onChanged: (value) => setState(() => _jenis = value!),
+                      ),
+                      const SizedBox(height: 10),
+
+                      if (_jenis == 'keluar')
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance.collection('mobil').snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            }
+                            if (snapshot.hasError) {
+                              return const Text('Gagal memuat data mobil');
+                            }
+                            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                              return const Text('Tidak ada data mobil');
+                            }
+
+                            final platList = snapshot.data!.docs
+                                .map((doc) => doc['plat']?.toString() ?? '')
+                                .where((plat) => plat.isNotEmpty)
+                                .toList();
+
+                            return DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(labelText: 'Plat Mobil'),
+                              value: _selectedPlatMobil,
+                              items: platList
+                                  .map((plat) => DropdownMenuItem<String>(
+                                        value: plat,
+                                        child: Text(plat),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) => setState(() => _selectedPlatMobil = value),
+                            );
+                          },
+                        ),
+
+                      const SizedBox(height: 10),
+
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance.collection('barang').snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          if (snapshot.hasError) {
+                            return const Text('Gagal memuat data barang');
+                          }
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return const Text('Tidak ada data barang');
+                          }
+
+                          final barangList = snapshot.data!.docs
+                              .map((doc) => doc['nama'] as String)
+                              .toList();
+
+                          return DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(labelText: 'Nama Barang'),
+                            value: _selectedBarang,
+                            items: barangList
+                                .map((nama) => DropdownMenuItem<String>(
+                                      value: nama,
+                                      child: Text(nama),
+                                    ))
+                                .toList(),
+                            onChanged: (value) => setState(() => _selectedBarang = value),
+                          );
+                        },
+                      ),
+
+                      TextField(
+                        controller: _jumlahController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Jumlah'),
+                      ),
+
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _simpanTransaksi,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurpleAccent,
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Simpan',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _status,
+                        style: TextStyle(
+                          color: _status.contains('berhasil') ? Colors.green : Colors.red,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
