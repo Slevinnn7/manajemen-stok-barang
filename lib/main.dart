@@ -15,7 +15,7 @@ class ManajemenStokApp extends StatelessWidget {
   const ManajemenStokApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {d
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Manajemen Stok Barang',
