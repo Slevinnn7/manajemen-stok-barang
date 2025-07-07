@@ -21,6 +21,13 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Email dan password tidak boleh kosong';
+      });
+      return;
+    }
+
     try {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
@@ -54,7 +61,13 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = e.message ?? 'Login gagal';
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          _errorMessage = 'Email atau password salah, silahkan coba lagi';
+        } else if (e.code == 'invalid-email') {
+          _errorMessage = 'Format email tidak valid';
+        } else {
+          _errorMessage = 'Password salah';
+        }
       });
     } catch (e) {
       if (!mounted) return;
@@ -71,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // Putih ke biru muda
+            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], 
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -143,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           _errorMessage,
                           style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                   ],

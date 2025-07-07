@@ -52,7 +52,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     final jumlah = int.tryParse(_jumlahController.text.trim()) ?? 0;
 
     if (nama.isEmpty || jumlah <= 0) {
-      setState(() => _status = 'Nama dan jumlah harus diisi dengan benar');
+      setState(() => _status = 'Nama barang dan jumlah harus diisi dengan benar');
       return;
     }
 
@@ -127,11 +127,10 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Input Barang'),
-        backgroundColor: const Color(0xFF03A9F4), // biru muda
+        backgroundColor: const Color(0xFF03A9F4), 
       ),
       body: Stack(
         children: [
-          // 🔷 Background gradasi dari putih ke biru muda
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
