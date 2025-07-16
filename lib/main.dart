@@ -9,7 +9,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Inisialisasi Firebase
   runApp(const ManajemenStokApp());
-} 
+}
 
 class ManajemenStokApp extends StatelessWidget {
   const ManajemenStokApp({super.key});
