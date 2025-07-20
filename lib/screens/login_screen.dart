@@ -51,7 +51,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final role = userData['role'] ?? 'nonadmin';
       final jabatan = userData['jabatan'] ?? '';
 
-      await SessionHelper.saveUser(email, role, jabatan);
+      await SessionHelper.saveUser(
+        username: email,
+        role: role,
+        jabatan: jabatan,
+      );
+
 
       if (!mounted) return;
       Navigator.pushReplacement(

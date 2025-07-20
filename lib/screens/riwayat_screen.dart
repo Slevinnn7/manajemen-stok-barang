@@ -47,11 +47,10 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Riwayat Transaksi'),
-        backgroundColor: const Color(0xFF03A9F4), // Biru muda
+        backgroundColor: const Color(0xFF03A9F4), 
       ),
       body: Stack(
         children: [
-          // Background gradasi putih ke biru muda
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(

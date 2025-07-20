@@ -127,7 +127,7 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Input Barang'),
-        backgroundColor: const Color(0xFF03A9F4), 
+        backgroundColor: const Color(0xFF03A9F4),
       ),
       body: Stack(
         children: [
@@ -182,13 +182,17 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
                               return const Text('Gagal memuat data mobil');
                             }
                             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                              return const Text('Tidak ada data mobil');
+                              return const Text('Belum ada data plat mobil. Tambah dulu di Master Data.');
                             }
 
                             final platList = snapshot.data!.docs
-                                .map((doc) => doc['plat']?.toString() ?? '')
+                                .map((doc) {
+                                  final data = doc.data() as Map<String, dynamic>;
+                                  return (data['plat'] ?? data['plat_mobil'] ?? '').toString();
+                                })
                                 .where((plat) => plat.isNotEmpty)
-                                .toList();
+                                .toList()
+                              ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())); 
 
                             return DropdownButtonFormField<String>(
                               decoration: const InputDecoration(labelText: 'Plat Mobil'),
@@ -216,12 +220,17 @@ class _InputBarangScreenState extends State<InputBarangScreen> {
                             return const Text('Gagal memuat data barang');
                           }
                           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                            return const Text('Tidak ada data barang');
+                            return const Text('Belum ada data barang. Tambah dulu di Master Data.');
                           }
 
                           final barangList = snapshot.data!.docs
-                              .map((doc) => doc['nama'] as String)
-                              .toList();
+                              .map((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                return (data['nama_barang'] ?? data['nama'] ?? '').toString();
+                              })
+                              .where((nama) => nama.isNotEmpty)
+                              .toList()
+                            ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())); 
 
                           return DropdownButtonFormField<String>(
                             decoration: const InputDecoration(labelText: 'Nama Barang'),

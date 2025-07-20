@@ -42,7 +42,7 @@ class _AkunScreenState extends State<AkunScreen> {
       const SnackBar(content: Text('Password berhasil diubah')),
     );
 
-    _passwordController.clear(); // Reset password setelah berhasil
+    _passwordController.clear(); 
   }
 
   Future<void> _hapusAkun(String uid) async {
@@ -200,14 +200,14 @@ class _AkunScreenState extends State<AkunScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Akun Saya'),
-        backgroundColor: const Color(0xFF03A9F4), // Biru muda
+        backgroundColor: const Color(0xFF03A9F4), 
       ),
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // Putih ke biru muda
+                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], 
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

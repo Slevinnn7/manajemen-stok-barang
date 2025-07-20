@@ -72,14 +72,14 @@ class _StokBarangScreenState extends State<StokBarangScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Data Stok Barang'),
-        backgroundColor: const Color(0xFF03A9F4), // biru muda
+        backgroundColor: const Color(0xFF03A9F4), 
       ),
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // putih ke biru muda
+                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], 
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

@@ -5,6 +5,8 @@ import 'riwayat_screen.dart';
 import 'akun_screen.dart';
 import '../services/session_helper.dart';
 import 'login_screen.dart';
+import 'tambah_barang_screen.dart';
+import 'tambah_plat_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -50,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        backgroundColor: const Color(0xFF03A9F4), // Biru muda untuk konsistensi
+        backgroundColor: const Color(0xFF03A9F4),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -61,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)], // Putih ke biru muda
+            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -74,11 +76,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSpacing: 16,
             children: [
               if (isAdmin || isKepalaGudang)
-                _buildMenuCard(context, 'Input Barang', Icons.add_box, const InputBarangScreen()),
-              _buildMenuCard(context, 'Lihat Stok', Icons.inventory, const StokBarangScreen()),
+                _buildMenuCard(
+                  context,
+                  'Input Barang',
+                  Icons.add_box,
+                  const InputBarangScreen(),
+                ),
+
+              _buildMenuCard(
+                context,
+                'Lihat Stok',
+                Icons.inventory,
+                const StokBarangScreen(),
+              ),
+
               if (isAdmin || isKepalaGudang)
-                _buildMenuCard(context, 'Riwayat', Icons.history, const RiwayatScreen()),
-              _buildMenuCard(context, 'Akun', Icons.person, const AkunScreen()),
+                _buildMenuCard(
+                  context,
+                  'Riwayat',
+                  Icons.history,
+                  const RiwayatScreen(),
+                ),
+
+              _buildMenuCard(
+                context,
+                'Akun',
+                Icons.person,
+                const AkunScreen(),
+              ),
+
+              if (isAdmin || isKepalaGudang)
+                _buildMenuCard(
+                  context,
+                  'Tambah Barang Baru',
+                  Icons.add_circle,
+                  const TambahBarangScreen(),
+                ),
+              if (isAdmin || isKepalaGudang)
+                _buildMenuCard(
+                  context,
+                  'Tambah Plat Mobil',
+                  Icons.directions_car,
+                  const TambahPlatScreen(),
+                ),
             ],
           ),
         ),
