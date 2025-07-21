@@ -47,7 +47,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar modern
+
       appBar: AppBar(
         title: const Text(
           "Tambah Plat Mobil Baru",
@@ -79,7 +79,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Icon kendaraan sebagai ilustrasi
+
                     const Icon(
                       Icons.directions_car_filled_outlined,
                       size: 64,
@@ -97,7 +97,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // TextField dengan icon & style modern
+
                     TextField(
                       controller: _platController,
                       textCapitalization: TextCapitalization.characters,
@@ -116,7 +116,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
 
                     const SizedBox(height: 28),
 
-                    // Tombol simpan lebih menonjol (warna hijau terang)
+
                     _isLoading
                         ? const CircularProgressIndicator()
                         : SizedBox(
@@ -133,12 +133,12 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.greenAccent.shade700, // ✅ lebih terlihat
-                                foregroundColor: Colors.white, // teks & ikon putih
+                                backgroundColor: Colors.greenAccent.shade700, 
+                                foregroundColor: Colors.white, 
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),
                                 ),
-                                elevation: 6, // bayangan tombol
+                                elevation: 6, 
                               ),
                             ),
                           ),

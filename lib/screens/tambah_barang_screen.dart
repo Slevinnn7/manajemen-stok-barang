@@ -48,7 +48,7 @@ class _TambahBarangScreenState extends State<TambahBarangScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar dengan style modern
+
       appBar: AppBar(
         title: const Text(
           "Tambah Barang Baru",
@@ -97,7 +97,7 @@ class _TambahBarangScreenState extends State<TambahBarangScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // TextField dengan icon & style lebih menarik
+
                     TextField(
                       controller: _namaBarangController,
                       decoration: InputDecoration(
@@ -115,7 +115,7 @@ class _TambahBarangScreenState extends State<TambahBarangScreen> {
                     
                     const SizedBox(height: 28),
                     
-                    // Tombol simpan lebih terlihat (warna hijau terang)
+
                     _isLoading
                         ? const CircularProgressIndicator()
                         : SizedBox(
@@ -132,12 +132,12 @@ class _TambahBarangScreenState extends State<TambahBarangScreen> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.greenAccent.shade700, // ✅ lebih terlihat
-                                foregroundColor: Colors.white, // teks & ikon putih
+                                backgroundColor: Colors.greenAccent.shade700, 
+                                foregroundColor: Colors.white, 
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),
                                 ),
-                                elevation: 6, // bayangan biar lebih timbul
+                                elevation: 6, 
                               ),
                             ),
                           ),
