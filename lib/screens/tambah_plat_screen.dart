@@ -24,7 +24,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
 
     try {
       await FirebaseFirestore.instance.collection('mobil').add({
-        'plat': _platController.text.trim(), 
+        'plat': _platController.text.trim(),
         'created_at': Timestamp.now(),
       });
 
@@ -33,7 +33,7 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
         const SnackBar(content: Text("Plat mobil berhasil ditambahkan")),
       );
 
-      Navigator.pop(context); 
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -47,66 +47,107 @@ class _TambahPlatScreenState extends State<TambahPlatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar modern
       appBar: AppBar(
-        title: const Text("Tambah Plat Mobil Baru"),
-        backgroundColor: const Color(0xFF03A9F4), 
+        title: const Text(
+          "Tambah Plat Mobil Baru",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.blueAccent,
       ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE3F2FD), Color(0xFF90CAF9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Card(
+              elevation: 10,
+              shadowColor: Colors.black26,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icon kendaraan sebagai ilustrasi
+                    const Icon(
+                      Icons.directions_car_filled_outlined,
+                      size: 64,
+                      color: Colors.blueAccent,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Masukkan Plat Mobil",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // TextField dengan icon & style modern
+                    TextField(
+                      controller: _platController,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.edit_road, color: Colors.blueAccent),
+                        labelText: "Plat Mobil",
+                        hintText: "Contoh: BG 1234 XX",
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Tombol simpan lebih menonjol (warna hijau terang)
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton.icon(
+                              onPressed: _simpanPlat,
+                              icon: const Icon(Icons.check_circle_outline, size: 22),
+                              label: const Text(
+                                "Simpan Plat",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.greenAccent.shade700, // ✅ lebih terlihat
+                                foregroundColor: Colors.white, // teks & ikon putih
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 6, // bayangan tombol
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Plat Mobil",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _platController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Masukkan plat mobil, contoh: BG 1234 XX",
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton.icon(
-                        onPressed: _simpanPlat,
-                        icon: const Icon(
-                          Icons.save,
-                          color: Color(0xFF03A9F4), 
-                        ),
-                        label: const Text(
-                          "Simpan",
-                          style: TextStyle(
-                            color: Colors.white, 
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurpleAccent, 
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
