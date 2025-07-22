@@ -52,7 +52,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        backgroundColor: const Color(0xFF03A9F4),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -60,10 +61,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           )
         ],
       ),
+
+      // Background lebih menarik → gradient halus
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFB3E5FC)],
+            colors: [Color(0xFFB3E5FC), Color(0xFFE1F5FE), Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -81,36 +84,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'Input Barang',
                   Icons.add_box,
                   const InputBarangScreen(),
+                  Colors.deepPurpleAccent,
                 ),
-
               _buildMenuCard(
                 context,
                 'Lihat Stok',
                 Icons.inventory,
                 const StokBarangScreen(),
+                Colors.teal,
               ),
-
               if (isAdmin || isKepalaGudang)
                 _buildMenuCard(
                   context,
                   'Riwayat',
                   Icons.history,
                   const RiwayatScreen(),
+                  Colors.orangeAccent,
                 ),
-
               _buildMenuCard(
                 context,
                 'Akun',
                 Icons.person,
                 const AkunScreen(),
+                Colors.indigo,
               ),
-
               if (isAdmin || isKepalaGudang)
                 _buildMenuCard(
                   context,
                   'Tambah Barang Baru',
                   Icons.add_circle,
                   const TambahBarangScreen(),
+                  Colors.green,
                 ),
               if (isAdmin || isKepalaGudang)
                 _buildMenuCard(
@@ -118,6 +122,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'Tambah Plat Mobil',
                   Icons.directions_car,
                   const TambahPlatScreen(),
+                  Colors.redAccent,
                 ),
             ],
           ),
@@ -127,11 +132,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMenuCard(
-      BuildContext context, String title, IconData icon, Widget screen) {
+      BuildContext context,
+      String title,
+      IconData icon,
+      Widget screen,
+      Color iconColor,
+      ) {
     return Card(
-      elevation: 6,
-      color: Colors.white.withOpacity(0.9),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8,
+      color: Colors.white.withOpacity(0.95),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shadowColor: Colors.black26,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -139,23 +150,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (context) => screen),
           );
         },
-        borderRadius: BorderRadius.circular(16),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 48, color: Colors.teal),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 50, color: iconColor),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
